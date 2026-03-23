@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardAI — AI Code Security Scanner</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="shield">&#128737;</span>
+                <h1>GuardAI</h1>
+            </div>
+            <p class="tagline">Catch security vulnerabilities in AI-generated code before they ship</p>
+        </header>
+
+        <main>
+            <section class="scan-form">
+                <h2>Paste code to scan</h2>
+                <form action="/scan" method="POST">
+                    <div class="form-group">
+                        <label for="filename">Filename</label>
+                        <input type="text" id="filename" name="filename" value="app.py" placeholder="e.g., app.py, index.js">
+                    </div>
+                    <div class="form-group">
+                        <label for="code">Code</label>
+                        <textarea id="code" name="code" rows="15" placeholder="Paste your code here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-scan">Scan for Vulnerabilities</button>
+                </form>
+            </section>
+
+            {% if scans %}
+            <section class="history">
+                <h2>Recent Scans</h2>
+                <div class="scan-list">
+                    {% for scan in scans[:10] %}
+                    <div class="scan-card">
+                        <div class="scan-score score-{{ 'good' if scan.score >= 80 else ('warn' if scan.score >= 50 else 'bad') }}">
+                            {{ scan.score }}
+                        </div>
+                        <div class="scan-info">
+                            <strong>{{ scan.filename }}</strong>
+                            <span class="scan-meta">{{ scan.findings_count }} findings &middot; {{ scan.timestamp[:16] }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>GuardAI v0.1.0 &middot; Protecting code, one PR at a time</p>
+        </footer>
+    </div>
+</body>
+</html>

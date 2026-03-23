@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardAI — Catch Security Flaws in AI-Generated Code</title>
+    <meta name="description" content="AI code security scanner that catches vulnerabilities in AI-generated code before they reach production. GitHub integration, CLI tool, real-time scanning.">
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --card: #131927;
+            --border: #2a3548;
+            --text: #e2e8f0;
+            --dim: #8892a4;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --critical: #ef4444;
+            --good: #22c55e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Nav */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+        .nav-logo { font-size: 1.5rem; font-weight: 700; text-decoration: none; color: var(--text); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--dim); text-decoration: none; font-size: 0.95rem; }
+        .nav-links a:hover { color: var(--text); }
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--accent2); }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { border-color: var(--accent); background: rgba(99,102,241,0.1); }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(99,102,241,0.12);
+            color: var(--accent2);
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--dim);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        .hero-cta { display: flex; gap: 1rem; justify-content: center; }
+
+        /* Terminal demo */
+        .demo {
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+        .terminal {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #161b22;
+        }
+        .terminal-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+        .terminal-body .prompt { color: var(--good); }
+        .terminal-body .cmd { color: var(--text); }
+        .terminal-body .output { color: var(--dim); }
+        .terminal-body .critical { color: var(--critical); font-weight: 600; }
+        .terminal-body .warn { color: #f59e0b; }
+        .terminal-body .ok { color: var(--good); }
+
+        /* Features */
+        .features {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .feature-card p { color: var(--dim); font-size: 0.95rem; }
+
+        /* Pricing */
+        .pricing {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        .pricing h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .pricing > p { color: var(--dim); margin-bottom: 3rem; }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .price-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: left;
+        }
+        .price-card.featured { border-color: var(--accent); }
+        .price-card h3 { margin-bottom: 0.25rem; }
+        .price-card .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        .price-card .price span { font-size: 1rem; font-weight: 400; color: var(--dim); }
+        .price-card ul {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        .price-card li {
+            padding: 0.4rem 0;
+            color: var(--dim);
+            font-size: 0.9rem;
+        }
+        .price-card li::before {
+            content: "\2713\0020";
+            color: var(--good);
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+        .cta-section h2 { font-size: 2rem; margin-bottom: 1rem; }
+        .cta-section p { color: var(--dim); margin-bottom: 2rem; }
+
+        /* Email form */
+        .email-form {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .email-form input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        .email-form input:focus { outline: none; border-color: var(--accent); }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dim);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.25rem; }
+            .features, .pricing-grid { grid-template-columns: 1fr; }
+            .hero-cta { flex-direction: column; align-items: center; }
+            .email-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">&#128737; GuardAI</a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="https://github.com/guardai/guardai">GitHub</a>
+            <a href="/dashboard" class="btn">Try Free</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <span class="hero-badge">40% of AI-generated code contains vulnerabilities</span>
+        <h1>Stop shipping insecure AI-generated code</h1>
+        <p>GuardAI scans your PRs in real-time, catching SQL injection, XSS, hardcoded secrets, and 50+ vulnerability patterns before they reach production.</p>
+        <div class="hero-cta">
+            <a href="#signup" class="btn">Get Early Access</a>
+            <a href="#demo" class="btn btn-outline">See Demo</a>
+        </div>
+    </section>
+
+    <section class="demo" id="demo">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+            </div>
+            <div class="terminal-body">
+                <span class="prompt">$</span> <span class="cmd">guardai scan ./my-project</span><br><br>
+                <span class="output">Scanning 147 files...</span><br><br>
+                <span class="critical">[CRITICAL]</span> <span class="output">SQL001 — SQL query built with f-string</span><br>
+                <span class="output">&nbsp;&nbsp;File: api/users.py:42</span><br>
+                <span class="output">&nbsp;&nbsp;Fix: Use parameterized queries</span><br><br>
+                <span class="critical">[CRITICAL]</span> <span class="output">SEC004 — AWS Access Key ID detected</span><br>
+                <span class="output">&nbsp;&nbsp;File: config/settings.py:8</span><br>
+                <span class="output">&nbsp;&nbsp;Fix: Use environment variables</span><br><br>
+                <span class="warn">[HIGH]</span> <span class="output">AUTH004 — MD5 used for hashing</span><br>
+                <span class="output">&nbsp;&nbsp;File: auth/login.py:23</span><br>
+                <span class="output">&nbsp;&nbsp;Fix: Use bcrypt or argon2</span><br><br>
+                <span class="output">Security Score: </span><span class="critical">35/100 (F)</span><br>
+                <span class="output">[</span><span class="critical">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="output">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;]</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature-card">
+            <div class="feature-icon">&#9889;</div>
+            <h3>Instant PR Scanning</h3>
+            <p>GitHub App scans every PR automatically. Get inline comments on vulnerable lines within seconds.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128269;</div>
+            <h3>50+ Security Rules</h3>
+            <p>SQL injection, XSS, hardcoded secrets, weak crypto, insecure configs, command injection, and more.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128187;</div>
+            <h3>CLI Tool</h3>
+            <p>Run <code>guardai scan .</code> locally or in CI/CD. JSON output for easy integration.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#127919;</div>
+            <h3>AI-Code Focused</h3>
+            <p>Rules specifically tuned for patterns that AI code generators commonly produce.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128736;</div>
+            <h3>Fix Suggestions</h3>
+            <p>Every finding includes a concrete fix suggestion with secure code examples.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128200;</div>
+            <h3>Security Score</h3>
+            <p>Track your codebase security health over time with a simple 0-100 score.</p>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <h2>Simple Pricing</h2>
+        <p>Start free. Scale as you grow.</p>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>Free</h3>
+                <p style="color: var(--dim)">For individual developers</p>
+                <div class="price">$0<span>/mo</span></div>
+                <ul>
+                    <li>CLI tool (unlimited local scans)</li>
+                    <li>5 PR scans per month</li>
+                    <li>Public repos only</li>
+                    <li>Community support</li>
+                </ul>
+                <a href="#signup" class="btn btn-outline" style="width:100%;text-align:center;">Get Started</a>
+            </div>
+            <div class="price-card featured">
+                <h3>Pro</h3>
+                <p style="color: var(--dim)">For teams shipping fast</p>
+                <div class="price">$29<span>/mo</span></div>
+                <ul>
+                    <li>Unlimited PR scans</li>
+                    <li>Private repos</li>
+                    <li>Custom rules</li>
+                    <li>Dashboard & history</li>
+                    <li>Email support</li>
+                </ul>
+                <a href="#signup" class="btn" style="width:100%;text-align:center;">Start Free Trial</a>
+            </div>
+            <div class="price-card">
+                <h3>Team</h3>
+                <p style="color: var(--dim)">For engineering orgs</p>
+                <div class="price">$99<span>/mo</span></div>
+                <ul>
+                    <li>Everything in Pro</li>
+                    <li>Up to 25 seats</li>
+                    <li>SSO / SAML</li>
+                    <li>Compliance reports</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#signup" class="btn btn-outline" style="width:100%;text-align:center;">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section" id="signup">
+        <h2>Get Early Access</h2>
+        <p>Join the waitlist. Be first to scan your AI-generated code.</p>
+        <form class="email-form" action="#" method="POST">
+            <input type="email" placeholder="you@company.com" required>
+            <button type="submit" class="btn">Join Waitlist</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>GuardAI &copy; 2026 &middot; Built for developers who ship fast and stay secure</p>
+    </footer>
+</body>
+</html>

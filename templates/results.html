@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results — GuardAI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo">
+                <span class="shield">&#128737;</span>
+                <h1>GuardAI</h1>
+            </a>
+        </header>
+
+        <main>
+            <section class="results-header">
+                <div class="score-circle score-{{ 'good' if result.score >= 80 else ('warn' if result.score >= 50 else 'bad') }}">
+                    <span class="score-value">{{ result.score }}</span>
+                    <span class="score-label">/ 100</span>
+                </div>
+                <div class="results-summary">
+                    <h2>{{ scan.filename }}</h2>
+                    <p>Scanned {{ result.files_scanned }} file(s) in {{ "%.2f"|format(result.scan_duration) }}s</p>
+                    <div class="severity-badges">
+                        {% if result.critical_count %}
+                        <span class="badge critical">{{ result.critical_count }} Critical</span>
+                        {% endif %}
+                        {% if result.high_count %}
+                        <span class="badge high">{{ result.high_count }} High</span>
+                        {% endif %}
+                        {% if result.medium_count %}
+                        <span class="badge medium">{{ result.medium_count }} Medium</span>
+                        {% endif %}
+                        {% if result.low_count %}
+                        <span class="badge low">{{ result.low_count }} Low</span>
+                        {% endif %}
+                        {% if not result.findings %}
+                        <span class="badge good">No issues found!</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            {% if result.findings %}
+            <section class="findings">
+                <h2>Findings</h2>
+                {% for finding in result.findings %}
+                <div class="finding-card severity-{{ finding.severity.value }}">
+                    <div class="finding-header">
+                        <span class="severity-badge {{ finding.severity.value }}">{{ finding.severity.value|upper }}</span>
+                        <span class="rule-id">{{ finding.rule_id }}</span>
+                        {% if finding.cwe_id %}
+                        <span class="cwe-id">{{ finding.cwe_id }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="finding-message">{{ finding.message }}</p>
+                    <div class="finding-location">
+                        <code>{{ finding.file_path }}:{{ finding.line_number }}</code>
+                    </div>
+                    <pre class="finding-code"><code>{{ finding.line_content.strip() }}</code></pre>
+                    {% if finding.suggestion %}
+                    <div class="finding-fix">
+                        <strong>Fix:</strong> {{ finding.suggestion }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            <a href="/" class="btn-back">Scan Another</a>
+        </main>
+    </div>
+</body>
+</html>
