@@ -30,6 +30,13 @@ def index():
     return render_template("dashboard.html", scans=scan_history)
 
 
+@app.route("/landing")
+def landing():
+    landing_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "landing", "index.html")
+    with open(landing_path) as f:
+        return f.read()
+
+
 @app.route("/scan", methods=["POST"])
 def scan_code():
     """Scan code submitted via form or API."""
