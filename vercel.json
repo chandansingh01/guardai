@@ -1,9 +1,6 @@
 {
-  "rewrites": [
-    { "source": "/landing", "destination": "/landing/index.html" },
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/scan", "destination": "/api/index.py" },
-    { "source": "/webhook/(.*)", "destination": "/api/index.py" },
-    { "source": "/", "destination": "/api/index.py" }
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "/api/index.py" }
   ]
 }
