@@ -5,238 +5,634 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GuardAI — Catch Security Flaws in AI-Generated Code</title>
     <meta name="description" content="AI code security scanner that catches vulnerabilities in AI-generated code before they reach production. GitHub integration, CLI tool, real-time scanning.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0e17;
-            --card: #131927;
-            --border: #2a3548;
-            --text: #e2e8f0;
-            --dim: #8892a4;
-            --accent: #6366f1;
-            --accent2: #818cf8;
-            --critical: #ef4444;
-            --good: #22c55e;
+            --bg: #060a10;
+            --bg-elevated: #0c1219;
+            --bg-card: #111a24;
+            --border: #1c2a3a;
+            --border-glow: #1a3a4a;
+            --text: #e8edf4;
+            --text-dim: #6b7a8d;
+            --text-muted: #3d4f63;
+            --cyan: #00e5ff;
+            --cyan-dim: #0097a7;
+            --cyan-glow: rgba(0, 229, 255, 0.15);
+            --cyan-glow-strong: rgba(0, 229, 255, 0.3);
+            --critical: #ff3b5c;
+            --critical-glow: rgba(255, 59, 92, 0.15);
+            --high: #ff8a00;
+            --good: #00e676;
+            --good-glow: rgba(0, 230, 118, 0.12);
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Outfit', sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* Nav */
+        /* Grid overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== Nav ===== */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1100px;
+            max-width: 1140px;
             margin: 0 auto;
             padding: 1.5rem 2rem;
+            position: relative;
+            z-index: 10;
         }
-        .nav-logo { font-size: 1.5rem; font-weight: 700; text-decoration: none; color: var(--text); }
-        .nav-links { display: flex; gap: 2rem; align-items: center; }
-        .nav-links a { color: var(--dim); text-decoration: none; font-size: 0.95rem; }
+
+        .nav-logo {
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-logo span {
+            filter: drop-shadow(0 0 6px var(--cyan-glow-strong));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.25rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: color 0.2s;
+            letter-spacing: 0.01em;
+        }
+
         .nav-links a:hover { color: var(--text); }
+
         .btn {
-            display: inline-block;
-            background: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--cyan-dim), #006b7a);
             color: white;
             border: none;
-            padding: 0.6rem 1.5rem;
+            padding: 0.6rem 1.4rem;
             border-radius: 8px;
             font-weight: 600;
+            font-family: 'Outfit', sans-serif;
             text-decoration: none;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            letter-spacing: 0.01em;
         }
-        .btn:hover { background: var(--accent2); }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #00b8cc, #0097a7);
+            box-shadow: 0 4px 24px var(--cyan-glow), 0 0 60px rgba(0, 229, 255, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .btn:active { transform: translateY(0); }
+
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
         }
-        .btn-outline:hover { border-color: var(--accent); background: rgba(99,102,241,0.1); }
 
-        /* Hero */
+        .btn-outline:hover {
+            border-color: var(--cyan-dim);
+            background: rgba(0, 229, 255, 0.06);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.06);
+        }
+
+        /* ===== Hero ===== */
         .hero {
             text-align: center;
-            padding: 6rem 2rem 4rem;
-            max-width: 800px;
+            padding: 7rem 2rem 4rem;
+            max-width: 840px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
+
+        /* Dramatic top glow */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 500px;
+            background: radial-gradient(ellipse 60% 45% at 50% 30%, var(--cyan-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
         .hero-badge {
-            display: inline-block;
-            background: rgba(99,102,241,0.12);
-            color: var(--accent2);
-            padding: 0.35rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--critical-glow);
+            color: var(--critical);
+            padding: 0.4rem 1.1rem;
             border-radius: 999px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 59, 92, 0.2);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.01em;
+            animation: fadeUp 0.6s ease-out;
         }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--critical);
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 800;
-            line-height: 1.1;
+            line-height: 1.05;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+            letter-spacing: -0.03em;
+            animation: fadeUp 0.6s ease-out 0.1s both;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--text) 0%, var(--cyan) 60%, var(--good) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--dim);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-        .hero-cta { display: flex; gap: 1rem; justify-content: center; }
 
-        /* Terminal demo */
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-dim);
+            max-width: 580px;
+            margin: 0 auto 2.5rem;
+            font-weight: 300;
+            line-height: 1.7;
+            animation: fadeUp 0.6s ease-out 0.2s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeUp 0.6s ease-out 0.3s both;
+        }
+
+        .hero-cta .btn { padding: 0.75rem 1.8rem; font-size: 0.95rem; }
+
+        /* ===== Terminal Demo ===== */
         .demo {
-            max-width: 700px;
-            margin: 0 auto 4rem;
+            max-width: 720px;
+            margin: 0 auto 5rem;
             padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.7s ease-out 0.4s both;
         }
+
         .terminal {
-            background: #0d1117;
+            background: var(--bg-elevated);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(0, 229, 255, 0.04);
         }
+
         .terminal-header {
             display: flex;
+            align-items: center;
             gap: 8px;
-            padding: 12px 16px;
-            background: #161b22;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
         }
+
         .terminal-dot {
-            width: 12px; height: 12px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
         }
+
         .terminal-dot.red { background: #ff5f57; }
         .terminal-dot.yellow { background: #febc2e; }
         .terminal-dot.green { background: #28c840; }
-        .terminal-body {
-            padding: 1.5rem;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.85rem;
-            line-height: 1.8;
-        }
-        .terminal-body .prompt { color: var(--good); }
-        .terminal-body .cmd { color: var(--text); }
-        .terminal-body .output { color: var(--dim); }
-        .terminal-body .critical { color: var(--critical); font-weight: 600; }
-        .terminal-body .warn { color: #f59e0b; }
-        .terminal-body .ok { color: var(--good); }
 
-        /* Features */
+        .terminal-title {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .terminal-body {
+            padding: 1.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.9;
+            position: relative;
+        }
+
+        /* Scanning line effect */
+        .terminal-body::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, var(--cyan) 50%, transparent 100%);
+            opacity: 0.25;
+            animation: termScan 4s ease-in-out infinite;
+        }
+
+        @keyframes termScan {
+            0% { top: 10%; opacity: 0; }
+            10% { opacity: 0.25; }
+            90% { opacity: 0.25; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .terminal-body .prompt { color: var(--cyan); }
+        .terminal-body .cmd { color: var(--text); }
+        .terminal-body .output { color: var(--text-dim); }
+        .terminal-body .critical { color: var(--critical); font-weight: 600; }
+        .terminal-body .warn { color: var(--high); font-weight: 500; }
+        .terminal-body .ok { color: var(--good); }
+        .terminal-body .file { color: var(--cyan-dim); }
+
+        /* ===== Features ===== */
+        .section-label {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            font-weight: 300;
+            margin-bottom: 3.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .features {
-            max-width: 1100px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .features-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 1.25rem;
         }
-        .feature-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-        }
-        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
-        .feature-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
-        .feature-card p { color: var(--dim); font-size: 0.95rem; }
 
-        /* Pricing */
-        .pricing {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-            text-align: center;
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        .pricing h2 { font-size: 2rem; margin-bottom: 0.5rem; }
-        .pricing > p { color: var(--dim); margin-bottom: 3rem; }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1.25rem;
+            background: var(--cyan-glow);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .feature-card code {
+            background: var(--bg);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            border: 1px solid var(--border);
+        }
+
+        /* ===== Pricing ===== */
+        .pricing {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 1.25rem;
+            align-items: start;
         }
+
         .price-card {
-            background: var(--card);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 2rem;
             text-align: left;
+            transition: border-color 0.3s, transform 0.3s;
+            position: relative;
         }
-        .price-card.featured { border-color: var(--accent); }
-        .price-card h3 { margin-bottom: 0.25rem; }
+
+        .price-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .price-card.featured {
+            border-color: var(--cyan-dim);
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.06);
+        }
+
+        .price-card.featured::before {
+            content: 'POPULAR';
+            position: absolute;
+            top: -1px;
+            right: 1.5rem;
+            background: linear-gradient(135deg, var(--cyan-dim), #006b7a);
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .price-card h3 {
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .price-card .subtitle {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-weight: 300;
+        }
+
         .price-card .price {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.75rem;
+            font-weight: 700;
+            margin: 1.25rem 0;
+            letter-spacing: -0.03em;
         }
-        .price-card .price span { font-size: 1rem; font-weight: 400; color: var(--dim); }
+
+        .price-card .price span {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-dim);
+            letter-spacing: 0;
+        }
+
         .price-card ul {
             list-style: none;
             margin: 1.5rem 0;
         }
+
         .price-card li {
             padding: 0.4rem 0;
-            color: var(--dim);
-            font-size: 0.9rem;
-        }
-        .price-card li::before {
-            content: "\2713\0020";
-            color: var(--good);
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 300;
         }
 
-        /* CTA */
+        .price-card li::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--cyan-dim);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .price-card .btn,
+        .price-card .btn-outline {
+            width: 100%;
+            text-align: center;
+            padding: 0.7rem;
+        }
+
+        /* ===== CTA ===== */
         .cta-section {
             text-align: center;
-            padding: 5rem 2rem;
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 1;
         }
-        .cta-section h2 { font-size: 2rem; margin-bottom: 1rem; }
-        .cta-section p { color: var(--dim); margin-bottom: 2rem; }
 
-        /* Email form */
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse 50% 60% at 50% 100%, var(--cyan-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-section p {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            font-size: 1.05rem;
+        }
+
         .email-form {
             display: flex;
             gap: 0.75rem;
             justify-content: center;
-            max-width: 450px;
+            max-width: 440px;
             margin: 0 auto;
         }
+
         .email-form input {
             flex: 1;
             padding: 0.75rem 1rem;
             border-radius: 8px;
             border: 1px solid var(--border);
-            background: var(--card);
+            background: var(--bg-card);
             color: var(--text);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
-        .email-form input:focus { outline: none; border-color: var(--accent); }
 
+        .email-form input::placeholder { color: var(--text-muted); }
+
+        .email-form input:focus {
+            outline: none;
+            border-color: var(--cyan-dim);
+            box-shadow: 0 0 0 3px var(--cyan-glow);
+        }
+
+        /* ===== Footer ===== */
         footer {
             text-align: center;
             padding: 2rem;
-            color: var(--dim);
-            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+            z-index: 1;
         }
 
+        footer::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 auto 1.5rem;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.25rem; }
-            .features, .pricing-grid { grid-template-columns: 1fr; }
+            .hero { padding: 4rem 1.5rem 3rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1rem; }
+            .features-grid,
+            .pricing-grid { grid-template-columns: 1fr; }
             .hero-cta { flex-direction: column; align-items: center; }
+            .hero-cta .btn { width: 100%; max-width: 280px; }
             .email-form { flex-direction: column; }
+            .nav-links { gap: 1.25rem; }
+            .nav-links a:not(.btn) { display: none; }
+            .section-title { font-size: 1.75rem; }
         }
     </style>
 </head>
 <body>
     <nav>
-        <a href="/" class="nav-logo">&#128737; GuardAI</a>
+        <a href="/" class="nav-logo"><span>&#128737;</span> GuardAI</a>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
@@ -247,7 +643,7 @@
 
     <section class="hero">
         <span class="hero-badge">40% of AI-generated code contains vulnerabilities</span>
-        <h1>Stop shipping insecure AI-generated code</h1>
+        <h1><span class="gradient">Stop shipping insecure AI-generated code</span></h1>
         <p>GuardAI scans your PRs in real-time, catching SQL injection, XSS, hardcoded secrets, and 50+ vulnerability patterns before they reach production.</p>
         <div class="hero-cta">
             <a href="#signup" class="btn">Get Early Access</a>
@@ -261,18 +657,19 @@
                 <div class="terminal-dot red"></div>
                 <div class="terminal-dot yellow"></div>
                 <div class="terminal-dot green"></div>
+                <span class="terminal-title">guardai &mdash; scan</span>
             </div>
             <div class="terminal-body">
                 <span class="prompt">$</span> <span class="cmd">guardai scan ./my-project</span><br><br>
                 <span class="output">Scanning 147 files...</span><br><br>
-                <span class="critical">[CRITICAL]</span> <span class="output">SQL001 — SQL query built with f-string</span><br>
-                <span class="output">&nbsp;&nbsp;File: api/users.py:42</span><br>
+                <span class="critical">[CRITICAL]</span> <span class="output">SQL001 &mdash; SQL query built with f-string</span><br>
+                <span class="output">&nbsp;&nbsp;</span><span class="file">api/users.py:42</span><br>
                 <span class="output">&nbsp;&nbsp;Fix: Use parameterized queries</span><br><br>
-                <span class="critical">[CRITICAL]</span> <span class="output">SEC004 — AWS Access Key ID detected</span><br>
-                <span class="output">&nbsp;&nbsp;File: config/settings.py:8</span><br>
+                <span class="critical">[CRITICAL]</span> <span class="output">SEC004 &mdash; AWS Access Key ID detected</span><br>
+                <span class="output">&nbsp;&nbsp;</span><span class="file">config/settings.py:8</span><br>
                 <span class="output">&nbsp;&nbsp;Fix: Use environment variables</span><br><br>
-                <span class="warn">[HIGH]</span> <span class="output">AUTH004 — MD5 used for hashing</span><br>
-                <span class="output">&nbsp;&nbsp;File: auth/login.py:23</span><br>
+                <span class="warn">[HIGH]</span> <span class="output">AUTH004 &mdash; MD5 used for hashing</span><br>
+                <span class="output">&nbsp;&nbsp;</span><span class="file">auth/login.py:23</span><br>
                 <span class="output">&nbsp;&nbsp;Fix: Use bcrypt or argon2</span><br><br>
                 <span class="output">Security Score: </span><span class="critical">35/100 (F)</span><br>
                 <span class="output">[</span><span class="critical">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span class="output">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;]</span>
@@ -281,45 +678,51 @@
     </section>
 
     <section class="features" id="features">
-        <div class="feature-card">
-            <div class="feature-icon">&#9889;</div>
-            <h3>Instant PR Scanning</h3>
-            <p>GitHub App scans every PR automatically. Get inline comments on vulnerable lines within seconds.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">&#128269;</div>
-            <h3>50+ Security Rules</h3>
-            <p>SQL injection, XSS, hardcoded secrets, weak crypto, insecure configs, command injection, and more.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">&#128187;</div>
-            <h3>CLI Tool</h3>
-            <p>Run <code>guardai scan .</code> locally or in CI/CD. JSON output for easy integration.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">&#127919;</div>
-            <h3>AI-Code Focused</h3>
-            <p>Rules specifically tuned for patterns that AI code generators commonly produce.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">&#128736;</div>
-            <h3>Fix Suggestions</h3>
-            <p>Every finding includes a concrete fix suggestion with secure code examples.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">&#128200;</div>
-            <h3>Security Score</h3>
-            <p>Track your codebase security health over time with a simple 0-100 score.</p>
+        <div class="section-label">Capabilities</div>
+        <h2 class="section-title">Built for AI-era security</h2>
+        <p class="section-subtitle">Everything you need to ship AI-generated code with confidence.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#9889;</div>
+                <h3>Instant PR Scanning</h3>
+                <p>GitHub App scans every PR automatically. Get inline comments on vulnerable lines within seconds.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128269;</div>
+                <h3>50+ Security Rules</h3>
+                <p>SQL injection, XSS, hardcoded secrets, weak crypto, insecure configs, command injection, and more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128187;</div>
+                <h3>CLI Tool</h3>
+                <p>Run <code>guardai scan .</code> locally or in CI/CD. JSON output for easy integration.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127919;</div>
+                <h3>AI-Code Focused</h3>
+                <p>Rules specifically tuned for patterns that AI code generators commonly produce.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128736;</div>
+                <h3>Fix Suggestions</h3>
+                <p>Every finding includes a concrete fix suggestion with secure code examples.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128200;</div>
+                <h3>Security Score</h3>
+                <p>Track your codebase security health over time with a simple 0-100 score.</p>
+            </div>
         </div>
     </section>
 
     <section class="pricing" id="pricing">
-        <h2>Simple Pricing</h2>
-        <p>Start free. Scale as you grow.</p>
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">Simple, transparent pricing</h2>
+        <p class="section-subtitle">Start free. Scale as you grow.</p>
         <div class="pricing-grid">
             <div class="price-card">
                 <h3>Free</h3>
-                <p style="color: var(--dim)">For individual developers</p>
+                <p class="subtitle">For individual developers</p>
                 <div class="price">$0<span>/mo</span></div>
                 <ul>
                     <li>CLI tool (unlimited local scans)</li>
@@ -327,11 +730,11 @@
                     <li>Public repos only</li>
                     <li>Community support</li>
                 </ul>
-                <a href="#signup" class="btn btn-outline" style="width:100%;text-align:center;">Get Started</a>
+                <a href="#signup" class="btn btn-outline">Get Started</a>
             </div>
             <div class="price-card featured">
                 <h3>Pro</h3>
-                <p style="color: var(--dim)">For teams shipping fast</p>
+                <p class="subtitle">For teams shipping fast</p>
                 <div class="price">$29<span>/mo</span></div>
                 <ul>
                     <li>Unlimited PR scans</li>
@@ -340,11 +743,11 @@
                     <li>Dashboard & history</li>
                     <li>Email support</li>
                 </ul>
-                <a href="#signup" class="btn" style="width:100%;text-align:center;">Start Free Trial</a>
+                <a href="#signup" class="btn">Start Free Trial</a>
             </div>
             <div class="price-card">
                 <h3>Team</h3>
-                <p style="color: var(--dim)">For engineering orgs</p>
+                <p class="subtitle">For engineering orgs</p>
                 <div class="price">$99<span>/mo</span></div>
                 <ul>
                     <li>Everything in Pro</li>
@@ -353,7 +756,7 @@
                     <li>Compliance reports</li>
                     <li>Priority support</li>
                 </ul>
-                <a href="#signup" class="btn btn-outline" style="width:100%;text-align:center;">Contact Sales</a>
+                <a href="#signup" class="btn btn-outline">Contact Sales</a>
             </div>
         </div>
     </section>
