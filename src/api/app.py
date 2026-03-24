@@ -119,23 +119,29 @@ def github_webhook():
 @app.route("/webhook/email", methods=["POST"])
 def email_webhook():
     """Handle inbound emails from Resend webhook."""
-    payload = request.get_json()
-    if not payload:
-        return jsonify({"error": "No payload"}), 400
+    try:
+        payload = request.get_json()
+        if not payload:
+            return jsonify({"error": "No payload"}), 400
 
-    # Resend sends the email data in the payload
-    email_data = payload.get("data", payload)
-    store_inbound(email_data)
-    return jsonify({"status": "received"}), 200
+        # Resend sends the email data in the payload
+        email_data = payload.get("data", payload)
+        store_inbound(email_data)
+        return jsonify({"status": "received"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/inbox", methods=["GET"])
 def get_inbox():
     """Get all inbound emails."""
-    unread_only = request.args.get("unread", "false").lower() == "true"
-    if unread_only:
-        return jsonify({"messages": get_unread()})
-    return jsonify({"messages": get_all_messages()})
+    try:
+        unread_only = request.args.get("unread", "false").lower() == "true"
+        if unread_only:
+            return jsonify({"messages": get_unread()})
+        return jsonify({"messages": get_all_messages()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/inbox/mark-read", methods=["POST"])
