@@ -9,13 +9,14 @@
       "use": "@vercel/static"
     },
     {
-      "src": "landing/index.html",
+      "src": "landing/**",
       "use": "@vercel/static"
     }
   ],
-  "rewrites": [
-    { "source": "/static/(.*)", "destination": "/static/$1" },
-    { "source": "/landing", "destination": "/landing/index.html" },
-    { "source": "/(.*)", "destination": "/api/index" }
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/landing/(.*)", "dest": "/landing/$1" },
+    { "src": "/landing", "dest": "/landing/index.html" },
+    { "src": "/(.*)", "dest": "/api/index" }
   ]
 }
