@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "local-test",
+    "from": "test@test.com",
+    "subject": "Local test",
+    "text": "hello",
+    "html": "",
+    "timestamp": "2026-03-23T00:00:00Z",
+    "read": false
+  }
+]
