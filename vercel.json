@@ -1,5 +1,21 @@
 {
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "landing/index.html",
+      "use": "@vercel/static"
+    }
+  ],
   "rewrites": [
+    { "source": "/static/(.*)", "destination": "/static/$1" },
+    { "source": "/landing", "destination": "/landing/index.html" },
     { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
