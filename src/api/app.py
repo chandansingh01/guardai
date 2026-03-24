@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.engine import GuardAIEngine
+from src.email_service import store_inbound, get_unread, get_all_messages, mark_all_read, send_email
 
 app = Flask(
     __name__,
@@ -113,6 +114,53 @@ def github_webhook():
     # TODO: Fetch PR diff, scan changed files, post review comments
     # This will use the GitHub API with an installation token
     return jsonify({"status": "queued", "pr": payload.get("number")}), 202
+
+
+@app.route("/webhook/email", methods=["POST"])
+def email_webhook():
+    """Handle inbound emails from Resend webhook."""
+    payload = request.get_json()
+    if not payload:
+        return jsonify({"error": "No payload"}), 400
+
+    # Resend sends the email data in the payload
+    email_data = payload.get("data", payload)
+    store_inbound(email_data)
+    return jsonify({"status": "received"}), 200
+
+
+@app.route("/api/inbox", methods=["GET"])
+def get_inbox():
+    """Get all inbound emails."""
+    unread_only = request.args.get("unread", "false").lower() == "true"
+    if unread_only:
+        return jsonify({"messages": get_unread()})
+    return jsonify({"messages": get_all_messages()})
+
+
+@app.route("/api/inbox/mark-read", methods=["POST"])
+def mark_inbox_read():
+    """Mark all inbox messages as read."""
+    mark_all_read()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/send", methods=["POST"])
+def send_email_api():
+    """Send an email via API."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data"}), 400
+
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+    html = data.get("html")
+
+    if not subject or not body:
+        return jsonify({"error": "subject and body are required"}), 400
+
+    result = send_email(subject, body, html)
+    return jsonify(result)
 
 
 if __name__ == "__main__":
